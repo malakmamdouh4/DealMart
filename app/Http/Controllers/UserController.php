@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
+use App\Models\User;
+
 
 class UserController extends Controller
 {
@@ -42,6 +45,40 @@ class UserController extends Controller
      }
 
 
-     
+     public function login(Request $request)
+     {
+
+        $credentials  =  $request->only('email', 'password');
+        $user = User::where('email',$request->email)->first();
+
+        if (! $token = auth()->attempt($credentials))
+        {
+            return response()->json([
+                'status' => 0 ,
+                'message' => 'Unauthorized',
+                'userId' => 0*1 ,
+                'userName' => null ,
+                'userEmail' =>null ,
+                'userPhone' => null,
+            ]);
+        }
+            return $this->createNewToken($token);
+
+     }
+
+
+      // user token
+    protected function createNewToken($token)
+    {
+       $user = auth()->user() ;
+        return response()->json([
+            'status' => 1 ,
+            'message' => 'user loggined successfully',
+            'userId' => $user->id*1 ,
+            'userName' => $user->name ,
+            'userEmail' =>$user->email ,
+            'userPhone' => $user->phone ,
+        ]);
+    }
 
 }
