@@ -11,7 +11,6 @@ class UserController extends Controller
 {
     
 
-
      // user register
      public function register(Request $request)
      {
@@ -45,13 +44,16 @@ class UserController extends Controller
      }
 
 
+     // user login
      public function login(Request $request)
      {
 
-        $credentials  =  $request->only('email', 'password');
-        $user = User::where('email',$request->email)->first();
-
-        if (! $token = auth()->attempt($credentials))
+        if ( $token = auth()->attempt(['phone' => request('username'), 'password' => request('password')]) ||
+             $token = auth()->attempt(['email' => request('username'), 'password' => request('password')]) )
+        {
+            return $this->createNewToken($token);
+        }
+        else
         {
             return response()->json([
                 'status' => 0 ,
@@ -62,8 +64,7 @@ class UserController extends Controller
                 'userPhone' => null,
             ]);
         }
-            return $this->createNewToken($token);
-
+        
      }
 
 
@@ -80,5 +81,6 @@ class UserController extends Controller
             'userPhone' => $user->phone ,
         ]);
     }
+
 
 }
