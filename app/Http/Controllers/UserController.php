@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Product;
+use App\Models\Favourite;
+use App\Models\Cart;
 
 
 class UserController extends Controller
@@ -81,6 +84,111 @@ class UserController extends Controller
             'userPhone' => $user->phone ,
         ]);
     }
+
+
+
+    //  add products to favourites or deleted
+    public function addToFavourite(Request $request)
+    {
+        $user = User::find($request->user_id) ;
+        $product = Product::find($request->product_id) ;
+        $favourites = Favourite::where([['user_id',$request->user_id],['product_id',$request->product_id]])->first();
+
+        if(!$user || $request->user_id == null )
+        {
+            return response()->json([
+                'status' => 0 ,
+                'message' => 'user not found',
+            ]);
+        }
+        elseif(!$product || $request->product_id == null )
+        {
+            return response()->json([
+                'status' => 0 ,
+                'message' => 'product not found',
+            ]);
+        }
+        elseif ($favourites)
+        {
+            $favourites->delete();
+
+            return response()->json([
+                'status' => 1 ,
+                'message' => 'product removed form favourites',
+            ]);
+        }
+        elseif(!$favourites && $user && $product)
+        {
+              Favourite::firstOrCreate([
+                'user_id'  => $request->user_id,
+                'product_id'  => $request->product_id,
+              ]);
+
+            return response()->json([
+                'status' => 1 ,
+                'message' => 'product add to favourites',
+            ]);
+        }
+        else
+        {
+            return response()->json([
+                'status' => 0 ,
+                'message' => 'error',
+            ]);
+        }
+
+    }
+
+
+     //  add products to favourites or deleted
+     public function addToCart(Request $request)
+     {
+         $user = User::find($request->user_id) ;
+         $product = Product::find($request->product_id) ;
+         $cart = Cart::where([['user_id',$request->user_id],['product_id',$request->product_id]])->first();
+ 
+         if(!$user || $request->user_id == null )
+         {
+             return response()->json([
+                 'status' => 0 ,
+                 'message' => 'user not found',
+             ]);
+         }
+         elseif(!$product || $request->product_id == null )
+         {
+             return response()->json([
+                 'status' => 0 ,
+                 'message' => 'product not found',
+             ]);
+         }
+         elseif($cart)
+         {
+            return response()->json([
+                'status' => 0 ,
+                'message' => 'product already in cart',
+            ]);
+         }
+         elseif( $user && $product)
+         {
+               Cart::firstOrCreate([
+                 'user_id'  => $request->user_id,
+                 'product_id'  => $request->product_id,
+               ]);
+ 
+             return response()->json([
+                 'status' => 1 ,
+                 'message' => 'product add to cart',
+             ]);
+         }
+         else
+         {
+             return response()->json([
+                 'status' => 0 ,
+                 'message' => 'error',
+             ]);
+         }
+ 
+     }
 
 
 }
