@@ -28,7 +28,7 @@ class UserController extends Controller
          if($validator->fails()){
              return response()->json([
                  'status' => 0 ,
-                 'message' => 'failed, inputs are required',
+                 'message' => 'failed, review inputs',
              ]);
          }
  
